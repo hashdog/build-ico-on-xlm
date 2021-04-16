@@ -2,7 +2,7 @@
 
 ## USAGE
 
-    docker run -it chebyte/build-ico-xlm 
+    docker build . -t  chebyte/build-ico-xlm 
 
     docker run -it chebyte/build-ico-xlm ruby /app/build-ico.rb
 
