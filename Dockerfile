@@ -4,8 +4,8 @@ RUN apk add --upgrade libsodium alpine-sdk
 
 RUN gem install stellar-sdk
 
-RUN cd /app/horizon-wrapper/ && bundle
-
 ADD . /app
 
 WORKDIR /app
+
+RUN cd horizon-wrapper/ && bundle
