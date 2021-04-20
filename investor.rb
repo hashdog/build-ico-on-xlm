@@ -65,22 +65,9 @@ tb = Stellar::TransactionBuilder.new(
     amount: max_supply,
     price: initial_price
   )
-)
-
-#Send TXS
-tx        = tb.build
-envelope  = tx.to_envelope(issuer, distributor)
-response  = horizon_client.submit_transaction(tx_envelope: envelope)
-p "Transaction was submitted successfully. It's hash is #{response.id}\n\n"
-
-#Build TXS investor
-seq_num = horizon_client.account_info(investor.address).sequence.to_i
-
-tb = Stellar::TransactionBuilder.new(
-  source_account: investor,
-  sequence_number: seq_num + 1
 ).add_operation(
     Stellar::Operation.change_trust(
+      source_account: investor,
       line: asset,
       limit: 20
     )
@@ -96,7 +83,7 @@ tb = Stellar::TransactionBuilder.new(
 
 #Send TXS
 tx        = tb.build
-envelope  = tx.to_envelope(investor)
+envelope  = tx.to_envelope(issuer, distributor, investor)
 response  = horizon_client.submit_transaction(tx_envelope: envelope)
 p "Transaction was submitted successfully. It's hash is #{response.id}\n\n"
 
