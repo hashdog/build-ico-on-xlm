@@ -1,3 +1,5 @@
+require 'rubygems'
+require 'bundler/setup'
 require "stellar-sdk"
 require "stellar-base"
 include Stellar::DSL

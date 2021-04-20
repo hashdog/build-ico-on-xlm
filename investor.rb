@@ -1,3 +1,5 @@
+require 'rubygems'
+require 'bundler/setup'
 require "stellar-sdk"
 require "stellar-base"
 include Stellar::DSL
@@ -34,7 +36,7 @@ tb = Stellar::TransactionBuilder.new(
 ).add_operation(
   Stellar::Operation.create_account(
     destination: investor,
-    starting_balance: 100
+    starting_balance: 1000
   )
 ).add_operation(
     Stellar::Operation.change_trust(
@@ -63,19 +65,38 @@ tb = Stellar::TransactionBuilder.new(
     amount: max_supply,
     price: initial_price
   )
+)
+
+#Send TXS
+tx        = tb.build
+envelope  = tx.to_envelope(issuer, distributor)
+response  = horizon_client.submit_transaction(tx_envelope: envelope)
+p "Transaction was submitted successfully. It's hash is #{response.id}\n\n"
+
+#Build TXS investor
+seq_num = horizon_client.account_info(investor.address).sequence.to_i
+
+tb = Stellar::TransactionBuilder.new(
+  source_account: investor,
+  sequence_number: seq_num + 1
+).add_operation(
+    Stellar::Operation.change_trust(
+      line: asset,
+      limit: 20
+    )
 ).add_operation(
   Stellar::Operation.manage_buy_offer(
     source_account: investor,
     selling: lumens,
     buying: asset,
-    buyAmount: "10",
+    amount: 10,
     price: initial_price
   )
 )
 
 #Send TXS
 tx        = tb.build
-envelope  = tx.to_envelope(issuer, distributor)
+envelope  = tx.to_envelope(investor)
 response  = horizon_client.submit_transaction(tx_envelope: envelope)
 p "Transaction was submitted successfully. It's hash is #{response.id}\n\n"
 
