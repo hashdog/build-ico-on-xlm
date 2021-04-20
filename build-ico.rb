@@ -1,4 +1,6 @@
 require "stellar-sdk"
+require "stellar-base"
+include Stellar::DSL
 
 # TESTNET
 client      = Stellar::Client.default_testnet
@@ -84,12 +86,34 @@ operation = Stellar::Operation.set_options({
       high_threshold: 1
 })
 
-# # add payment to transaction and set a 600ms timeout
 tx = builder.add_operation(operation).set_timeout(600).build
-# # sign transaction and get xdr
 envelope = tx.to_envelope(issuer).to_xdr(:base64)
 client.horizon.transactions._post(tx: envelope)
 
+
+#MAKE SELL OFFER
+#op = Stellar::Operation.manage_buy_offer(buying: buying_asset, selling: selling_asset, buyAmount: 50, price: 10)
+#Stellar::Asset.alphanum4
+asset  = Asset("#{custom_coin}-#{issuer.address}")
+lumens = Asset("XLM-native")
+
+seq_num = client.account_info(distributor.address).sequence.to_i
+
+builder = Stellar::TransactionBuilder.new(
+  source_account: distributor,
+  sequence_number: seq_num + 1
+)
+
+operation =  Stellar::Operation.manage_sell_offer(
+    selling: asset,
+    buying: lumens,
+    amount: max_supply,
+    price: 1
+  )
+
+tx = builder.add_operation(operation).set_timeout(600).build
+envelope = tx.to_envelope(distributor).to_xdr(:base64)
+client.horizon.transactions._post(tx: envelope)
 
 puts "\n\nICO #{custom_coin} is Success!\n\n"
 
